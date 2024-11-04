@@ -4,9 +4,9 @@
   "description": "An application focused on creating studying questions, notes, and building knowledge through reinforcement learning.",
   "main": "index.js",
   "scripts": {
-    "build": "tsc && node ./dist/index.js",
-    "dev": "tsx ./src/index.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc && node --experimental-sqlite --no-warnings=ExperimentalWarnings ./dist/index.js",
+    "dev": "tsx --experimental-sqlite --no-warnings=ExperimentalWarnings ./src/index.ts",
+    "test": "NODE_ENV='test' tsx --experimental-sqlite --no-warnings=ExperimentalWarnings --test './src/**/*.test.*'"
   },
   "repository": {
     "type": "git",
