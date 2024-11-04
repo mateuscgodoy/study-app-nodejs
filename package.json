@@ -1,0 +1,30 @@
+{
+  "name": "study-app-nodejs",
+  "version": "1.0.0",
+  "description": "An application focused on creating studying questions, notes, and building knowledge through reinforcement learning.",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc && node ./dist/index.js",
+    "dev": "tsx ./src/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mateuscgodoy/study-app-nodejs.git"
+  },
+  "keywords": [
+    "\"Study",
+    "App\""
+  ],
+  "author": "Mateus Colombo Godoy",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mateuscgodoy/study-app-nodejs/issues"
+  },
+  "homepage": "https://github.com/mateuscgodoy/study-app-nodejs#readme",
+  "devDependencies": {
+    "@types/node": "^22.8.7",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}
