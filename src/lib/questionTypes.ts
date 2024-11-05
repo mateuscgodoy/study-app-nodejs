@@ -4,9 +4,13 @@ export type QuestionObj = {
   alternatives: string[];
 };
 
-export type QuestionDBM = {
-  id: number;
+export type QuestionDBM<T> = {
+  id?: number;
   text: string;
+  created_at: string;
+  correctAnswer: T;
+  otherAlternatives?: string[];
+  question_type: string;
 };
 
 export type AlternativeDBM = {

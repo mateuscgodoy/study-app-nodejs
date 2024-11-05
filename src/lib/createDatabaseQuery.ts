@@ -1,7 +1,13 @@
-const createQuestionsQuery = `CREATE TABLE IF NOT EXISTS questions (
+const createQuestionsQuery = `CREATE TABLE IF NOT EXISTS question_types (
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+name TEXT NOT NULL UNIQUE
+);
+CREATE TABLE IF NOT EXISTS questions (
 id INTEGER PRIMARY KEY AUTOINCREMENT,
 text TEXT NOT NULL UNIQUE,
-created_at TEXT 
+question_type_id INTEGER,
+created_at TEXT,
+FOREIGN KEY (question_type_id) REFERENCES question_types(id)
 );
 CREATE TABLE IF NOT EXISTS alternatives (
 id INTEGER PRIMARY KEY AUTOINCREMENT,
