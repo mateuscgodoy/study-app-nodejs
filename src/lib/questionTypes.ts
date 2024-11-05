@@ -1,5 +1,6 @@
 export type QuestionObj = {
   text: string;
+  instruction?: string;
   alternatives: string[];
 };
 
