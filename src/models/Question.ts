@@ -1,7 +1,4 @@
-export type QuestionObj = {
-  text: string;
-  alternatives: string[];
-};
+import { QuestionObj } from '../lib/questionTypes';
 
 export default class Question {
   private readonly _text;
@@ -50,5 +47,14 @@ export default class Question {
         )
       ) && answers.length === this.correctAlternatives.length
     );
+  }
+
+  toString(): string {
+    const { text, alternatives } = this.getDisplayQuestion();
+    let output = `💠 ${text}`;
+    alternatives.forEach((alt, i) => {
+      output += `\n\t${i + 1}. ${alt}`;
+    });
+    return output;
   }
 }
