@@ -61,7 +61,7 @@ export default class SingleAnswerQuestion implements IQuestion<string> {
     );
   }
 
-  serialize(): QuestionDBM<string> {
+  serialize(): QuestionDBM {
     return {
       text: this.text,
       correctAnswer: this.correctAnswer,

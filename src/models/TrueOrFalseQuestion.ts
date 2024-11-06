@@ -51,9 +51,9 @@ export default class TrueOrFalseQuestion implements IQuestion<boolean> {
     return answer === this._correctAnswer;
   }
 
-  serialize(): QuestionDBM<boolean> {
+  serialize(): QuestionDBM {
     return {
-      correctAnswer: this._correctAnswer,
+      correctAnswer: this._correctAnswer ? 'T' : 'F',
       created_at: this._createdAt.toISOString(),
       text: this._text,
       question_type: this._questionType,

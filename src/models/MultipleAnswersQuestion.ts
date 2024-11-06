@@ -65,7 +65,7 @@ export default class MultipleAnswersQuestion implements IQuestion<string[]> {
     );
   }
 
-  serialize(): QuestionDBM<string[]> {
+  serialize(): QuestionDBM {
     return {
       text: this.text,
       created_at: this.created_at.toISOString(),

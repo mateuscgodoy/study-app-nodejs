@@ -8,5 +8,5 @@ export default interface IQuestion<T> {
   created_at: Date;
   getDisplayQuestion(): QuestionObj;
   checkAnswer(answer: T): boolean;
-  serialize(): QuestionDBM<T>;
+  serialize(): QuestionDBM;
 }
