@@ -4,13 +4,16 @@ export type QuestionObj = {
   alternatives: string[];
 };
 
-export type QuestionDBM = {
+export type Question = {
   id?: number;
   text: string;
   created_at: string;
+  question_type: string;
+};
+
+export type QuestionDBM = Question & {
   correctAnswer: string | string[];
   otherAlternatives?: string[];
-  question_type: string;
 };
 
 export type AlternativeDBM = {
@@ -20,8 +23,9 @@ export type AlternativeDBM = {
   is_correct: number;
 };
 
-export interface OperationResult {
+export interface OperationResult<T = unknown> {
   success: boolean;
   error?: Error;
   message: string;
+  data?: T;
 }
