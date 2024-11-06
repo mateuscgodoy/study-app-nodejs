@@ -4,9 +4,10 @@ import createQuestionsQuery from '../lib/createDatabaseQuery';
 import {
   AlternativeDBM,
   OperationResult,
-  QuestionDBM,
+  Question,
 } from '../lib/questionTypes';
-import IQuestion from '../lib/IQuestion';
+import QuestionFactory from '../lib/QuestionFactory';
+import BaseQuestion from '../models/BaseQuestion';
 
 export default class DatabaseService {
   private instance: DatabaseSync;
@@ -16,10 +17,10 @@ export default class DatabaseService {
     this.instance.exec(createQuestionsQuery);
   }
 
-  saveQuestion(question: IQuestion<any>): OperationResult {
+  saveQuestion(question: BaseQuestion<any>): OperationResult {
     try {
       const data = question.serialize();
-
+      console.log(data);
       const getQuestionType = this.instance.prepare(
         'SELECT id FROM question_types WHERE name = ?;'
       );
@@ -73,11 +74,35 @@ export default class DatabaseService {
         message: 'Save operation failed',
       };
     }
-    return { success: true, message: 'Question was successfully saved' };
+    return { success: true, message: 'Question saved with success' };
   }
 
-  loadQuestion(id: number) {
-    // TODO Database Load Question
+  loadQuestion(id: number): OperationResult<BaseQuestion<unknown>> {
+    // Does a question with the provided ID exists on DB? (Don't forget to JOIN with the question_type)
+    const question = this.instance
+      .prepare(
+        'SELECT q.id, q.text, q.created_at, t.name as question_type FROM questions q INNER JOIN question_types t ON q.question_type_id = t.id WHERE q.id = ?;'
+      )
+      .get(id) as Question;
+
+    if (!question.id) {
+      return {
+        success: false,
+        message: 'A question with the provided ID was not found',
+      };
+    }
+
+    const alternatives = this.instance
+      .prepare('SELECT * FROM alternatives WHERE question_id = ?;')
+      .all(question.id) as AlternativeDBM[];
+
+    // Pass all that information to a "QuestionFactory" that will correctly create the proper question
+    const questionInstance = QuestionFactory.build(question, alternatives);
+    return {
+      success: true,
+      message: 'Question loaded with success',
+      data: questionInstance,
+    };
   }
 
   private insertAlternative(alternative: AlternativeDBM) {
