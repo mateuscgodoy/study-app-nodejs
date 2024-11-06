@@ -1,8 +1,12 @@
 import { DatabaseSync } from 'node:sqlite';
 
 import createQuestionsQuery from '../lib/createDatabaseQuery';
-import Question from '../models/Question';
-import { AlternativeDBM, QuestionDBM } from '../lib/questionTypes';
+import {
+  AlternativeDBM,
+  OperationResult,
+  QuestionDBM,
+} from '../lib/questionTypes';
+import IQuestion from '../lib/IQuestion';
 
 export default class DatabaseService {
   private instance: DatabaseSync;
@@ -12,48 +16,75 @@ export default class DatabaseService {
     this.instance.exec(createQuestionsQuery);
   }
 
-  saveQuestion(question: Question) {
-    // Create the Question
-    const questionInsert = this.instance.prepare(
-      'INSERT INTO questions (text) VALUES (?);'
-    );
-    // Collect ID from question created
-    const { lastInsertRowid } = questionInsert.run(question.text);
-    // Prepare Insert statement for alternatives
-    const alternativeInsert = this.instance.prepare(
-      'INSERT INTO alternatives (text, question_id, is_correct) VALUES (?, ?, ?)'
-    );
-    // Insert correct alternatives
-    for (const alternative of question.correctAlternatives) {
-      alternativeInsert.run(alternative, lastInsertRowid, 1);
+  saveQuestion(question: IQuestion<any>): OperationResult {
+    try {
+      const data = question.serialize();
+
+      const getQuestionType = this.instance.prepare(
+        'SELECT id FROM question_types WHERE name = ?;'
+      );
+
+      let { id } = getQuestionType.get(data.question_type) as {
+        id: number | null;
+      };
+
+      if (!id) {
+        const { lastInsertRowid } = this.instance
+          .prepare('INSERT INTO question_types (name) VALUES (?);')
+          .run(data.question_type);
+        id = lastInsertRowid as number;
+      }
+
+      const { lastInsertRowid: questionId } = this.instance
+        .prepare(
+          'INSERT INTO questions (text, question_type_id, created_at) VALUES (?, ?, ?);'
+        )
+        .run(data.text, id, data.created_at);
+
+      if (Array.isArray(data.correctAnswer)) {
+        for (const answer of data.correctAnswer) {
+          this.insertAlternative({
+            text: answer,
+            question_id: questionId as number,
+            is_correct: 1,
+          });
+        }
+      } else {
+        this.insertAlternative({
+          text: data.correctAnswer,
+          question_id: questionId as number,
+          is_correct: 1,
+        });
+      }
+
+      if (data.otherAlternatives) {
+        for (const other of data.otherAlternatives) {
+          this.insertAlternative({
+            text: other,
+            question_id: questionId as number,
+            is_correct: 0,
+          });
+        }
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: error as Error,
+        message: 'Save operation failed',
+      };
     }
-    // Insert wrong alternatives
-    for (const alternative of question.wrongAlternatives) {
-      alternativeInsert.run(alternative, lastInsertRowid, 0);
-    }
+    return { success: true, message: 'Question was successfully saved' };
   }
 
   loadQuestion(id: number) {
-    const getQuestion = this.instance.prepare(
-      'SELECT * FROM questions WHERE id = ?;'
-    );
-    const questionObj = getQuestion.get(id) as QuestionDBM | undefined;
-    if (!questionObj) {
-      throw new Error('Error: there is no Question for the provided ID');
-    }
-    const getAlternatives = this.instance.prepare(
-      'SELECT * FROM alternatives WHERE question_id = ?;'
-    );
-    const alternatives = getAlternatives.all(
-      questionObj.id
-    ) as AlternativeDBM[];
-    const correctOnes = alternatives
-      .filter((alt) => alt.is_correct === 1)
-      .map((alt) => alt.text);
-    const wrongOnes = alternatives
-      .filter((alt) => alt.is_correct === 0)
-      .map((alt) => alt.text);
+    // TODO Database Load Question
+  }
 
-    return new Question(questionObj.text, wrongOnes, correctOnes);
+  private insertAlternative(alternative: AlternativeDBM) {
+    this.instance
+      .prepare(
+        'INSERT INTO alternatives (text, question_id, is_correct) VALUES (?,?,?);'
+      )
+      .run(alternative.text, alternative.question_id, alternative.is_correct);
   }
 }
