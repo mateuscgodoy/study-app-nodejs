@@ -1,16 +1,9 @@
-import { QuestionDBM, QuestionObj } from '../lib/questionTypes';
+import { QuestionDBM, QuestionObj } from '../../lib/questionTypes';
 import BaseQuestion from './BaseQuestion';
 
 export default class TrueOrFalseQuestion extends BaseQuestion<boolean> {
-  protected text: string;
-  protected correctAnswer: boolean;
-  protected createdAt: Date;
-
   constructor(text: string, correctAnswer: boolean, createAt?: Date) {
-    super();
-    this.text = text;
-    this.correctAnswer = correctAnswer;
-    this.createdAt = createAt ?? new Date();
+    super(text, correctAnswer, createAt);
   }
 
   getDisplayQuestion(): QuestionObj {
@@ -33,6 +26,9 @@ export default class TrueOrFalseQuestion extends BaseQuestion<boolean> {
   }
   getInstruction(): string {
     return 'True or False';
+  }
+  validateCorrectAnswerInput(input: boolean): boolean {
+    return true;
   }
 
   static override getQuestionType(): string {

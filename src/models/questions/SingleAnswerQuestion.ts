@@ -1,10 +1,8 @@
-import { QuestionDBM, QuestionObj } from '../lib/questionTypes';
+import { QuestionDBM, QuestionObj } from '../../lib/questionTypes';
+import InvalidQuestionArgument from '../errors/InvalidQuestionArgument';
 import BaseQuestion from './BaseQuestion';
 
 export default class SingleAnswerQuestion extends BaseQuestion<string> {
-  protected text: string;
-  protected correctAnswer: string;
-  protected createdAt: Date;
   private otherAlternatives: string[];
 
   constructor(
@@ -13,11 +11,17 @@ export default class SingleAnswerQuestion extends BaseQuestion<string> {
     otherAlternatives: string[],
     createdAt?: Date
   ) {
-    super();
-    this.text = text;
-    this.correctAnswer = correctAnswer;
+    super(text, correctAnswer, createdAt);
+
+    for (const alt of otherAlternatives) {
+      if (!this.validateCorrectAnswerInput(alt)) {
+        throw new InvalidQuestionArgument(
+          'Question alternative input is invalid or has no characters'
+        );
+      }
+    }
+
     this.otherAlternatives = otherAlternatives;
-    this.createdAt = createdAt ?? new Date();
   }
 
   getDisplayQuestion(): QuestionObj {
@@ -48,6 +52,9 @@ export default class SingleAnswerQuestion extends BaseQuestion<string> {
   }
   getInstruction(): string {
     return 'Choose one alternative from the available options.';
+  }
+  validateCorrectAnswerInput(input: string): boolean {
+    return input.trim().length > 0;
   }
 
   static override getQuestionType(): string {
