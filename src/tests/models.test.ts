@@ -243,6 +243,51 @@ describe('Question models test suit', () => {
       );
     });
 
+    it('throws InvalidQuestionArgument when the correct answer is an empty string', () => {
+      assert.throws(
+        () => {
+          const question = new MultipleAnswersQuestion(
+            'My question text',
+            ['', 'correct answer 2'],
+            ['other answer 1', 'other answer 2', 'other answer 3'],
+            new Date()
+          );
+        },
+        InvalidQuestionArgument,
+        'The correct answer input provided is invalid'
+      );
+    });
+
+    it('throws InvalidQuestionArgument when the correct answer only has whitespace characters', () => {
+      assert.throws(
+        () => {
+          const question = new MultipleAnswersQuestion(
+            'My question text',
+            ['            ', 'correct answer 2'],
+            ['other answer 1', 'other answer 2', 'other answer 3'],
+            new Date()
+          );
+        },
+        InvalidQuestionArgument,
+        'The correct answer input provided is invalid'
+      );
+    });
+
+    it('throws InvalidQuestionArgument when one of the other alternatives is empty', () => {
+      assert.throws(
+        () => {
+          const question = new MultipleAnswersQuestion(
+            'My question text',
+            ['Correct answer 1', 'correct answer 2'],
+            ['other answer 1', '', 'other answer 3'],
+            new Date()
+          );
+        },
+        InvalidQuestionArgument,
+        'Question alternative input is invalid or has no characters'
+      );
+    });
+
     describe('', () => {
       let multipleAnswersQuestion: MultipleAnswersQuestion;
       const createdAt = new Date();
