@@ -1,7 +1,8 @@
-import BaseQuestion from '../models/BaseQuestion';
-import MultipleAnswersQuestion from '../models/MultipleAnswersQuestion';
-import SingleAnswerQuestion from '../models/SingleAnswerQuestion';
-import TrueOrFalseQuestion from '../models/TrueOrFalseQuestion';
+import InvalidQuestionArgument from '../models/errors/InvalidQuestionArgument';
+import BaseQuestion from '../models/questions/BaseQuestion';
+import MultipleAnswersQuestion from '../models/questions/MultipleAnswersQuestion';
+import SingleAnswerQuestion from '../models/questions/SingleAnswerQuestion';
+import TrueOrFalseQuestion from '../models/questions/TrueOrFalseQuestion';
 import { AlternativeDBM, Question } from './questionTypes';
 
 export default class QuestionFactory {
@@ -47,7 +48,7 @@ export default class QuestionFactory {
         );
 
       default:
-        throw new Error('Invalid question type provided');
+        throw new InvalidQuestionArgument('Invalid question type provided');
     }
   }
 }
