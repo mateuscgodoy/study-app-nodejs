@@ -9,7 +9,7 @@ export default class TrueOrFalseQuestion extends BaseQuestion<boolean> {
   getDisplayQuestion(): QuestionObj {
     return {
       text: this.text,
-      instruction: this.getInstruction(),
+      instruction: TrueOrFalseQuestion.getInstruction(),
       alternatives: ['True', 'False'],
     };
   }
@@ -24,14 +24,14 @@ export default class TrueOrFalseQuestion extends BaseQuestion<boolean> {
       question_type: TrueOrFalseQuestion.getQuestionType(),
     };
   }
-  getInstruction(): string {
-    return 'True or False';
-  }
   validateCorrectAnswerInput(input: boolean): boolean {
     return true;
   }
 
   static override getQuestionType(): string {
     return 'true_or_false';
+  }
+  static override getInstruction(): string {
+    return 'True or False';
   }
 }

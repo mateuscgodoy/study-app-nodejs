@@ -1,6 +1,7 @@
 import { QuestionDBM, QuestionObj } from '../../lib/questionTypes';
 import InvalidQuestionArgument from '../errors/InvalidQuestionArgument';
 import BaseQuestion from './BaseQuestion';
+import TrueOrFalseQuestion from './TrueOrFalseQuestion';
 
 export default class SingleAnswerQuestion extends BaseQuestion<string> {
   private otherAlternatives: string[];
@@ -32,7 +33,7 @@ export default class SingleAnswerQuestion extends BaseQuestion<string> {
     }
     return {
       text: this.text,
-      instruction: this.getInstruction(),
+      instruction: SingleAnswerQuestion.getInstruction(),
       alternatives,
     };
   }
@@ -50,14 +51,15 @@ export default class SingleAnswerQuestion extends BaseQuestion<string> {
       otherAlternatives: this.otherAlternatives,
     };
   }
-  getInstruction(): string {
-    return 'Choose one alternative from the available options.';
-  }
+
   validateCorrectAnswerInput(input: string): boolean {
     return input.trim().length > 0;
   }
 
   static override getQuestionType(): string {
     return 'single_answer';
+  }
+  static override getInstruction(): string {
+    return 'Choose one alternative from the available options.';
   }
 }

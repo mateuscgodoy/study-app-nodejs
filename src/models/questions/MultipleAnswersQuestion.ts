@@ -28,7 +28,7 @@ export default class MultipleAnswersQuestion extends BaseQuestion<string[]> {
     }
     return {
       text: this.text,
-      instruction: this.getInstruction(),
+      instruction: MultipleAnswersQuestion.getInstruction(),
       alternatives,
     };
   }
@@ -39,6 +39,7 @@ export default class MultipleAnswersQuestion extends BaseQuestion<string[]> {
       ) && answers.length === this.correctAnswer.length
     );
   }
+
   serialize(): QuestionDBM {
     return {
       text: this.text,
@@ -48,9 +49,7 @@ export default class MultipleAnswersQuestion extends BaseQuestion<string[]> {
       otherAlternatives: this.otherAlternatives,
     };
   }
-  getInstruction(): string {
-    return 'Choose one or more alternatives from the available options.';
-  }
+
   validateCorrectAnswerInput(input: string[]): boolean {
     for (const alt of input) {
       if (!(alt.trim().length > 0)) {
@@ -61,5 +60,8 @@ export default class MultipleAnswersQuestion extends BaseQuestion<string[]> {
   }
   static override getQuestionType(): string {
     return 'multiple_answers';
+  }
+  static override getInstruction(): string {
+    return 'Choose one or more alternatives from the available options.';
   }
 }

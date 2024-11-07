@@ -30,10 +30,13 @@ export default abstract class BaseQuestion<T> {
   abstract getDisplayQuestion(): QuestionObj;
   abstract checkAnswer(answer: T): boolean;
   abstract serialize(): QuestionDBM;
-  abstract getInstruction(): string;
+
   abstract validateCorrectAnswerInput(input: T): boolean;
 
   static getQuestionType(): string {
     return 'Not defined';
+  }
+  static getInstruction(): string {
+    return '';
   }
 }
