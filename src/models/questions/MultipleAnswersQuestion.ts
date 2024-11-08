@@ -1,3 +1,4 @@
+import adjustDateISOString from '../../lib/adjustDateISOString';
 import { QuestionDBM, QuestionObj } from '../../lib/questionTypes';
 import InvalidQuestionArgument from '../errors/InvalidQuestionArgument';
 import BaseQuestion from './BaseQuestion';
@@ -43,7 +44,7 @@ export default class MultipleAnswersQuestion extends BaseQuestion<string[]> {
   serialize(): QuestionDBM {
     return {
       text: this.text,
-      created_at: this.createdAt.toISOString(),
+      created_at: adjustDateISOString(this.createdAt),
       question_type: MultipleAnswersQuestion.getQuestionType(),
       correctAnswer: this.correctAnswer,
       otherAlternatives: this.otherAlternatives,

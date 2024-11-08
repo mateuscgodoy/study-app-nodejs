@@ -1,3 +1,4 @@
+import adjustDateISOString from '../../lib/adjustDateISOString';
 import { QuestionDBM, QuestionObj } from '../../lib/questionTypes';
 import BaseQuestion from './BaseQuestion';
 
@@ -19,7 +20,7 @@ export default class TrueOrFalseQuestion extends BaseQuestion<boolean> {
   serialize(): QuestionDBM {
     return {
       correctAnswer: this.correctAnswer ? 'T' : 'F',
-      created_at: this.createdAt.toISOString(),
+      created_at: adjustDateISOString(this.createdAt),
       text: this.text,
       question_type: TrueOrFalseQuestion.getQuestionType(),
     };

@@ -7,6 +7,7 @@ import SingleAnswerQuestion from '../models/questions/SingleAnswerQuestion';
 import MultipleAnswersQuestion from '../models/questions/MultipleAnswersQuestion';
 import { QuestionDBM, QuestionObj } from '../lib/questionTypes';
 import InvalidQuestionArgument from '../models/errors/InvalidQuestionArgument';
+import adjustDateISOString from '../lib/adjustDateISOString';
 
 describe('Question models test suit', () => {
   describe('BaseClass', () => {
@@ -87,7 +88,7 @@ describe('Question models test suit', () => {
         const mock: QuestionDBM = {
           text: 'Some true or false question',
           correctAnswer: 'T',
-          created_at: createdAt.toISOString(),
+          created_at: adjustDateISOString(createdAt),
           question_type: TrueOrFalseQuestion.getQuestionType(),
         };
         const serialized = trueOrFalseQuestion.serialize();
@@ -191,7 +192,7 @@ describe('Question models test suit', () => {
         const mock: QuestionDBM = {
           text: 'Some true or false question',
           correctAnswer: 'a valid answer',
-          created_at: createdAt.toISOString(),
+          created_at: adjustDateISOString(createdAt),
           question_type: SingleAnswerQuestion.getQuestionType(),
           otherAlternatives: ['other alternative 1', 'other alternative 2'],
         };
@@ -314,7 +315,7 @@ describe('Question models test suit', () => {
         const mock: QuestionDBM = {
           text: 'Some multiple answer question',
           correctAnswer: ['a valid answer', 'another valid answer'],
-          created_at: createdAt.toISOString(),
+          created_at: adjustDateISOString(createdAt),
           question_type: MultipleAnswersQuestion.getQuestionType(),
           otherAlternatives: ['other alternative 1', 'other alternative 2'],
         };

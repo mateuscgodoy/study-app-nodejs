@@ -1,3 +1,4 @@
+import adjustDateISOString from '../../lib/adjustDateISOString';
 import { QuestionDBM, QuestionObj } from '../../lib/questionTypes';
 import InvalidQuestionArgument from '../errors/InvalidQuestionArgument';
 import BaseQuestion from './BaseQuestion';
@@ -46,7 +47,7 @@ export default class SingleAnswerQuestion extends BaseQuestion<string> {
     return {
       text: this.text,
       correctAnswer: this.correctAnswer,
-      created_at: this.createdAt.toISOString(),
+      created_at: adjustDateISOString(this.createdAt),
       question_type: SingleAnswerQuestion.getQuestionType(),
       otherAlternatives: this.otherAlternatives,
     };
