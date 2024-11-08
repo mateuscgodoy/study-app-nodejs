@@ -69,7 +69,7 @@ describe('Question models test suit', () => {
       );
     });
 
-    describe('', () => {
+    describe('class methods', () => {
       let trueOrFalseQuestion: TrueOrFalseQuestion;
       const createdAt = new Date();
       beforeEach(() => {
@@ -172,7 +172,7 @@ describe('Question models test suit', () => {
       );
     });
 
-    describe('', () => {
+    describe('class methods', () => {
       let singleAnswerQuestion: SingleAnswerQuestion;
       const createdAt = new Date();
       beforeEach(() => {
@@ -289,7 +289,7 @@ describe('Question models test suit', () => {
       );
     });
 
-    describe('', () => {
+    describe('class methods', () => {
       let multipleAnswersQuestion: MultipleAnswersQuestion;
       const createdAt = new Date();
       beforeEach(() => {
