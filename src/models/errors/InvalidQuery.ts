@@ -1,7 +1,11 @@
 export default class InvalidQuery extends Error {
-  private query: string;
+  private _query: string;
   constructor(message: string, query: string) {
     super(message);
-    this.query = query;
+    this._query = query;
+  }
+
+  get query() {
+    return this._query;
   }
 }
