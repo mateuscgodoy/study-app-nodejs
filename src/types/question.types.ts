@@ -1,6 +1,6 @@
 export type QuestionObj = {
   text: string;
-  instruction?: string;
+  instruction: string;
   alternatives: string[];
 };
 
@@ -23,7 +23,7 @@ export type AlternativeDBM = {
   is_correct: number;
 };
 
-export interface OperationResult<T = unknown> {
+export interface OperationResult<T = null> {
   success: boolean;
   error?: Error;
   message: string;
