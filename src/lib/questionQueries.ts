@@ -1,6 +1,39 @@
-const questionQueries: {
+export const initQuestionDatabase = `PRAGMA foreign_key = ON;
+  CREATE TABLE IF NOT EXISTS question_types (
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+name TEXT NOT NULL UNIQUE
+);
+CREATE TABLE IF NOT EXISTS questions (
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+text TEXT NOT NULL UNIQUE,
+question_type_id INTEGER NOT NULL,
+created_at TEXT,
+difficulty INTEGER CHECK(difficulty BETWEEN 0 AND 2),
+FOREIGN KEY (question_type_id) REFERENCES question_types(id)
+);
+CREATE TABLE IF NOT EXISTS alternatives (
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+question_id INTEGER NOT NULL,
+text TEXT NOT NULL,
+is_correct INTEGER NOT NULL,
+explanation TEXT,
+FOREIGN KEY (question_id) REFERENCES questions(id)
+);
+CREATE TABLE IF NOT EXISTS themes (
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+name TEXT NOT NULL UNIQUE
+);
+CREATE TABLE IF NOT EXISTS tags (
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+question_id INTEGER NOT NULL,
+theme_id INTEGER NOT NULL,
+FOREIGN KEY (question_id) REFERENCES questions(id),
+FOREIGN KEY (theme_id) REFERENCES themes(id),
+UNIQUE(question_id, theme_id)
+);`;
+
+export const questionQueries: {
   [key: string]: string;
-  init: string;
   selectQuestionTypeId: string;
   selectQuestionById: string;
   selectAlternatives: string;
@@ -8,24 +41,6 @@ const questionQueries: {
   insertNewQuestion: string;
   insertNewAlternative: string;
 } = {
-  init: `CREATE TABLE IF NOT EXISTS question_types (
-id INTEGER PRIMARY KEY AUTOINCREMENT,
-name TEXT NOT NULL UNIQUE
-);
-CREATE TABLE IF NOT EXISTS questions (
-id INTEGER PRIMARY KEY AUTOINCREMENT,
-text TEXT NOT NULL UNIQUE,
-question_type_id INTEGER,
-created_at TEXT,
-FOREIGN KEY (question_type_id) REFERENCES question_types(id)
-);
-CREATE TABLE IF NOT EXISTS alternatives (
-id INTEGER PRIMARY KEY AUTOINCREMENT,
-question_id INTEGER,
-text TEXT NOT NULL,
-is_correct INTEGER NOT NULL,
-FOREIGN KEY (question_id) REFERENCES questions(id)
-);`,
   selectQuestionTypeId: 'SELECT id FROM question_types WHERE name = ?;',
   selectQuestionById: `SELECT q.id, q.text, q.created_at, t.name as question_type 
     FROM questions q 
@@ -38,5 +53,3 @@ FOREIGN KEY (question_id) REFERENCES questions(id)
   insertNewAlternative:
     'INSERT INTO alternatives (text, question_id, is_correct) VALUES (?,?,?);',
 };
-
-export default questionQueries;
