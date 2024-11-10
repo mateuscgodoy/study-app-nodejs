@@ -1,0 +1,7 @@
+const enum QUESTION_TYPES {
+  TRUE_OR_FALSE = 0,
+  SINGLE_ANSWER = 1,
+  MULTIPLE_ANSWERS = 2,
+}
+
+export default QUESTION_TYPES;
