@@ -1,40 +1,39 @@
-import { QuestionDBM, QuestionObj } from '../../types/question.types';
-import InvalidQuestionArgument from '../errors/InvalidQuestionArgument';
+import DIFFICULTY from '../../lib/enums/difficulty';
+import QUESTION_TYPES from '../../lib/enums/questionTypes';
+import {
+  QuestionDBM,
+  Question,
+  QuestionDisplay,
+} from '../../types/question.types';
+import Alternative from './Alternative';
 
-export default abstract class BaseQuestion<T> {
+export default abstract class BaseQuestion {
   protected text: string;
-  protected correctAnswer: T;
+  protected alternatives: Alternative[];
+  protected tags: string[];
   protected createdAt: Date;
+  protected difficulty: DIFFICULTY | null;
 
-  constructor(text: string, correctAnswer: T, createdAt?: Date) {
-    if (!text.trim().length) {
-      throw new InvalidQuestionArgument('Question text must not be empty');
-    }
-    const currentDate = new Date();
-    if (createdAt && createdAt.getTime() > currentDate.getTime()) {
-      throw new InvalidQuestionArgument(
-        'Creation date may not be in the future'
-      );
-    }
-    if (!this.validateCorrectAnswerInput(correctAnswer)) {
-      throw new InvalidQuestionArgument(
-        'The correct answer input provided is invalid'
-      );
-    }
-
-    this.text = text;
-    this.correctAnswer = correctAnswer;
-    this.createdAt = createdAt ?? currentDate;
+  constructor(question: Question, createdAt?: Date) {
+    this.text = question.text;
+    this.alternatives = question.alternatives;
+    this.tags = question.tags ?? [];
+    this.createdAt = createdAt ?? new Date();
+    this.difficulty = question.difficulty ?? null;
   }
 
-  abstract display(): QuestionObj;
-  abstract checkAnswer(answer: T): boolean;
-  abstract serialize(): QuestionDBM;
+  checkAnswer(answer: string): boolean {
+    return this.alternatives.some(
+      (alt) =>
+        alt.text.toLocaleLowerCase() === answer.toLocaleLowerCase() &&
+        alt.isCorrect
+    );
+  }
+  abstract display(): QuestionDisplay;
+  abstract serialize(): QuestionDBM; // ! This might need a new place
 
-  abstract validateCorrectAnswerInput(input: T): boolean;
-
-  static getQuestionType(): string {
-    return 'Not defined';
+  static getType(): QUESTION_TYPES {
+    return QUESTION_TYPES.NONE;
   }
   static getInstruction(): string {
     return '';
