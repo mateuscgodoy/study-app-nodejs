@@ -1,5 +1,5 @@
 import adjustDateISOString from '../../lib/adjustDateISOString';
-import { QuestionDBM, QuestionObj } from '../../lib/questionTypes';
+import { QuestionDBM, QuestionObj } from '../../types/question.types';
 import BaseQuestion from './BaseQuestion';
 
 export default class TrueOrFalseQuestion extends BaseQuestion<boolean> {
@@ -7,7 +7,7 @@ export default class TrueOrFalseQuestion extends BaseQuestion<boolean> {
     super(text, correctAnswer, createAt);
   }
 
-  getDisplayQuestion(): QuestionObj {
+  display(): QuestionObj {
     return {
       text: this.text,
       instruction: TrueOrFalseQuestion.getInstruction(),

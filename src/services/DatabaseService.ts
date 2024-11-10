@@ -1,7 +1,7 @@
 import { DatabaseSync, SupportedValueType } from 'node:sqlite';
 
-import { OperationResult } from '../lib/questionTypes';
 import InvalidQuery from '../models/errors/InvalidQuery';
+import { OperationResult } from '../types/question.types';
 
 export default class DatabaseService {
   private instance: DatabaseSync;
@@ -50,7 +50,7 @@ export default class DatabaseService {
     } catch (error) {
       return {
         success: false,
-        message: `INSERT operation failed with message: '${
+        message: `GET ALL operation failed with message: '${
           (error as Error).message
         }'`,
         error: error as Error,

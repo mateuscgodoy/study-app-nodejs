@@ -1,20 +1,23 @@
+import DatabaseService from '../services/DatabaseService';
+import {
+  initQuestionDatabase,
+  questionQueries as queries,
+} from '../lib/questionQueries';
+import BaseQuestion from '../models/questions/BaseQuestion';
+import InvalidQuery from '../models/errors/InvalidQuery';
+import QuestionFactory from '../lib/QuestionFactory';
 import {
   AlternativeDBM,
   OperationResult,
   Question,
   QuestionDBM,
-} from '../lib/questionTypes';
-import DatabaseService from '../services/DatabaseService';
-import { default as queries } from '../lib/questionQueries';
-import BaseQuestion from '../models/questions/BaseQuestion';
-import InvalidQuery from '../models/errors/InvalidQuery';
-import QuestionFactory from '../lib/QuestionFactory';
+} from '../types/question.types';
 
 export default class QuestionController {
   private db: DatabaseService;
 
   constructor(questionDbPath: string) {
-    this.db = new DatabaseService(questionDbPath, queries.init);
+    this.db = new DatabaseService(questionDbPath, initQuestionDatabase);
   }
 
   createQuestion(data: QuestionDBM): OperationResult {
@@ -29,7 +32,7 @@ export default class QuestionController {
         getIdResult.data!,
         data.created_at,
       ]);
-      const questionId = insertResult.newId;
+      const questionId = insertResult.data?.newId!;
 
       if (Array.isArray(data.correctAnswer)) {
         for (const answer of data.correctAnswer) {
@@ -73,7 +76,6 @@ export default class QuestionController {
         throw new InvalidQuery(getQuestion.message, queries.selectQuestionById);
       }
       const questionData: Question = getQuestion.data!;
-
       const getAlternatives = this.db.getAll<AlternativeDBM[]>(
         queries.selectAlternatives,
         [questionData.id!]
@@ -121,10 +123,11 @@ export default class QuestionController {
         queries.selectQuestionTypeId,
         [name]
       );
+
       let id = result.data?.id;
       if (!id) {
         const result = this.db.insert(queries.insertNewType, [name]);
-        id = result.newId;
+        id = result.data?.newId;
       }
 
       return {
@@ -140,32 +143,4 @@ export default class QuestionController {
       };
     }
   }
-
-  // loadQuestion(id: number): OperationResult<BaseQuestion<unknown>> {
-  //   // Does a question with the provided ID exists on DB? (Don't forget to JOIN with the question_type)
-  //   const question = this.instance
-  //     .prepare(
-  //       'SELECT q.id, q.text, q.created_at, t.name as question_type FROM questions q INNER JOIN question_types t ON q.question_type_id = t.id WHERE q.id = ?;'
-  //     )
-  //     .get(id) as Question;
-
-  //   if (!question.id) {
-  //     return {
-  //       success: false,
-  //       message: 'A question with the provided ID was not found',
-  //     };
-  //   }
-
-  //   const alternatives = this.instance
-  //     .prepare('SELECT * FROM alternatives WHERE question_id = ?;')
-  //     .all(question.id) as AlternativeDBM[];
-
-  //   // Pass all that information to a "QuestionFactory" that will correctly create the proper question
-  //   const questionInstance = QuestionFactory.build(question, alternatives);
-  //   return {
-  //     success: true,
-  //     message: 'Question loaded with success',
-  //     data: questionInstance,
-  //   };
-  // }
 }

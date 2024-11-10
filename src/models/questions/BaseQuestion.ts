@@ -1,4 +1,4 @@
-import { QuestionDBM, QuestionObj } from '../../lib/questionTypes';
+import { QuestionDBM, QuestionObj } from '../../types/question.types';
 import InvalidQuestionArgument from '../errors/InvalidQuestionArgument';
 
 export default abstract class BaseQuestion<T> {
@@ -27,7 +27,7 @@ export default abstract class BaseQuestion<T> {
     this.createdAt = createdAt ?? currentDate;
   }
 
-  abstract getDisplayQuestion(): QuestionObj;
+  abstract display(): QuestionObj;
   abstract checkAnswer(answer: T): boolean;
   abstract serialize(): QuestionDBM;
 

@@ -1,5 +1,5 @@
 import adjustDateISOString from '../../lib/adjustDateISOString';
-import { QuestionDBM, QuestionObj } from '../../lib/questionTypes';
+import { QuestionDBM, QuestionObj } from '../../types/question.types';
 import InvalidQuestionArgument from '../errors/InvalidQuestionArgument';
 import BaseQuestion from './BaseQuestion';
 
@@ -21,7 +21,7 @@ export default class MultipleAnswersQuestion extends BaseQuestion<string[]> {
     this.otherAlternatives = otherAlternatives;
   }
 
-  getDisplayQuestion(): QuestionObj {
+  display(): QuestionObj {
     const alternatives = [...this.correctAnswer, ...this.otherAlternatives];
     for (let i = alternatives.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
