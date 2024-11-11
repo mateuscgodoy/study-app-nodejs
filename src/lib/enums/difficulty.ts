@@ -1,7 +1,8 @@
-const enum DIFFICULTY {
-  BEGINNER = 0,
-  INTERMEDIATE = 1,
-  ADVANCED = 2,
+enum DIFFICULTY {
+  NONE = 0,
+  BEGINNER = 1,
+  INTERMEDIATE = 2,
+  ADVANCED = 3,
 }
 
 export default DIFFICULTY;
