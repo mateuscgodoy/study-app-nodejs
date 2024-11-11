@@ -1,16 +1,16 @@
 import { DatabaseSync, SupportedValueType } from 'node:sqlite';
 
 import InvalidQuery from '../models/errors/InvalidQuery';
-import { OperationResult } from '../types/question.types';
+import OperationResult from '../lib/interfaces/OperationResult';
+import { initQuestionDatabase } from '../lib/util/questionQueries';
+import { ID } from '../types/question.types';
 
 export default class DatabaseService {
   private instance: DatabaseSync;
 
-  constructor(dbPath: string = ':memory:', starterQuery?: string) {
+  constructor(dbPath: string = ':memory:') {
     this.instance = new DatabaseSync(dbPath);
-    if (starterQuery) {
-      this.instance.exec(starterQuery);
-    }
+    this.instance.exec(initQuestionDatabase);
   }
 
   get<T>(query: string, params: SupportedValueType[] = []): OperationResult<T> {
@@ -26,13 +26,7 @@ export default class DatabaseService {
         data: result as T,
       };
     } catch (error) {
-      return {
-        success: false,
-        message: `GET operation failed with message: '${
-          (error as Error).message
-        }'`,
-        error: error as Error,
-      };
+      throw error;
     }
   }
 
@@ -48,36 +42,24 @@ export default class DatabaseService {
         data: result as T,
       };
     } catch (error) {
-      return {
-        success: false,
-        message: `GET ALL operation failed with message: '${
-          (error as Error).message
-        }'`,
-        error: error as Error,
-      };
+      throw error;
     }
   }
 
   insert(
     query: string,
     params: SupportedValueType[] = []
-  ): OperationResult<{ newId: number; changes: number }> {
+  ): OperationResult<{ newId: ID; changes: ID }> {
     try {
       const statement = this.instance.prepare(query);
       const { changes, lastInsertRowid } = statement.run(...params);
       return {
         success: true,
         message: 'INSERT query completed',
-        data: { newId: lastInsertRowid as number, changes: changes as number },
+        data: { newId: lastInsertRowid, changes: changes },
       };
     } catch (error) {
-      return {
-        success: false,
-        message: `INSERT operation failed with message: '${
-          (error as Error).message
-        }'`,
-        error: error as Error,
-      };
+      throw error;
     }
   }
 
