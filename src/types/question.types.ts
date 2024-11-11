@@ -1,31 +1,46 @@
-export type QuestionObj = {
+import DIFFICULTY from '../lib/enums/difficulty';
+import QUESTION_TYPES from '../lib/enums/questionTypes';
+
+export type ID = number | bigint;
+
+export type QuestionData = {
   text: string;
-  instruction: string;
+  questionType: QUESTION_TYPES;
+  difficulty?: DIFFICULTY;
+};
+
+export type QuestionDBM = Omit<QuestionData, 'questionType'> & {
+  questionType: string;
+  createdAt: string;
+};
+
+export type QuestionDisplay = Omit<
+  QuestionDBM,
+  'correctAnswer' | 'otherAlternatives'
+> & {
+  id?: ID;
   alternatives: string[];
+  instruction: string;
 };
 
-export type Question = {
-  id?: number;
+export type AlternativeDisplay = {
   text: string;
-  created_at: string;
-  question_type: string;
 };
 
-export type QuestionDBM = Question & {
-  correctAnswer: string | string[];
-  otherAlternatives?: string[];
+export type AlternativeAnswered = AlternativeDisplay & {
+  explanation?: string;
 };
 
-export type AlternativeDBM = {
-  id?: number;
-  question_id: number;
-  text: string;
-  is_correct: number;
+export type AlternativeData = AlternativeAnswered & {
+  isCorrect: boolean;
 };
 
-export interface OperationResult<T = null> {
-  success: boolean;
-  error?: Error;
-  message: string;
-  data?: T;
-}
+export type AlternativeDBM = Omit<AlternativeData, 'isCorrect'> & {
+  question_id: ID;
+  isCorrect: number;
+};
+
+// export type TagData = {
+//   questionId: ID;
+//   tags: string[];
+// };
