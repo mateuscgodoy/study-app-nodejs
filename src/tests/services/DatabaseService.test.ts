@@ -1,4 +1,4 @@
-import assert from 'assert';
+import assert from 'assert/strict';
 import { beforeEach, describe, it } from 'node:test';
 import DatabaseService from '../../services/DatabaseService';
 
@@ -31,64 +31,66 @@ describe('DatabaseService', () => {
       it('correctly GET a single Note from testing table', () => {
         const note = db.get<Note>('SELECT * FROM notes WHERE id = ?', [1]);
 
-        assert.ok(result.success);
         assert.ok(note);
         assert.equal(note.content, 'Testing note 1');
       });
 
       it('returns a generic object even without the necessary parameters', () => {
-        const result = db.get<Note>('SELECT * FROM notes WHERE id = ?', []);
+        const note = db.get<Note>('SELECT * FROM notes WHERE id = ?', []);
 
-        assert.ok(result.success);
-        assert.ok(result.data);
-        assert.equal(result.data.id, null);
-        assert.equal(result.data.content, null);
+        assert.ok(note);
+        assert.equal(note.id, null);
+        assert.equal(note.content, null);
       });
 
       it('returns a generic object even with invalid parameters', () => {
-        const result = db.get<Note>('SELECT * FROM notes WHERE id = ?', [
+        const note = db.get<Note>('SELECT * FROM notes WHERE id = ?', [
           'invalid',
         ]);
 
-        assert.ok(result.success);
-        assert.ok(result.data);
-        assert.equal(result.data.id, null);
-        assert.equal(result.data.content, null);
+        assert.ok(note);
+        assert.equal(note.id, null);
+        assert.equal(note.content, null);
       });
 
       it('throws when trying to GET tables that do not exist', () => {
-        const result = db.get<Note>('SELECT * FROM invalid', []);
-
-        assert.equal(result.success, false);
-        assert.equal(
-          result.message,
-          "GET operation failed with message: 'no such table: invalid'"
-        );
+        assert.throws(() => {
+          const note = db.get<Note>('SELECT * FROM invalid', []);
+        });
       });
 
       it('throws when improper number of arguments ', () => {
-        const result = db.get<Note>('SELECT * FROM notes WHERE id = ?', [
-          'invalid',
-          1,
-        ]);
-
-        assert.equal(result.success, false);
-        assert.equal(
-          result.message,
-          "GET operation failed with message: 'column index out of range'"
-        );
+        assert.throws(() => {
+          const note = db.get<Note>('SELECT * FROM notes WHERE id = ?', [
+            'invalid',
+            1,
+          ]);
+        });
       });
     });
 
     describe('GET ALL method', () => {
-      it('correctly GET an array of all elements', () => {
-        const result = db.getAll<Note[]>('SELECT * FROM notes');
+      it('correctly GET ALL notes as an array', () => {
+        const notes = db.getAll<Note>('SELECT * FROM notes');
 
-        console.log(result);
-        const data = result.data;
-        assert(result.success);
-        assert(data);
-        assert(data.length === 3);
+        assert(notes);
+        assert(notes.length === 3);
+        assert(Array.isArray(notes));
+      });
+
+      it('throws when trying to GET ALL tables that do not exist', () => {
+        assert.throws(() => {
+          const note = db.getAll<Note>('SELECT * FROM invalid', []);
+        });
+      });
+
+      it('throws when improper number of arguments ', () => {
+        assert.throws(() => {
+          const note = db.getAll<Note>('SELECT * FROM notes WHERE id = ?', [
+            'invalid',
+            1,
+          ]);
+        });
       });
     });
 
@@ -98,36 +100,27 @@ describe('DatabaseService', () => {
           'A testing note',
         ]);
 
-        const data = result.data;
-        assert(data);
-        assert.ok(data.newId > 3);
-        assert.equal(data.changes, 1);
+        assert(result);
+        assert.ok(result.newId > 3);
+        assert.equal(result.changes, 1);
       });
 
       it('throws when trying to INSERT tables that do not exist', () => {
-        const result = db.insert(
-          'INSERT INTO invalid (content) VALUES (?)',
-          []
-        );
-
-        assert.equal(result.success, false);
-        assert.equal(
-          result.message,
-          "INSERT operation failed with message: 'no such table: invalid'"
-        );
+        assert.throws(() => {
+          const result = db.insert(
+            'INSERT INTO invalid (content) VALUES (?)',
+            []
+          );
+        });
       });
 
       it('throws when improper number of arguments ', () => {
-        const result = db.insert('INSERT INTO notes (content) VALUES (?)', [
-          1,
-          'should be invalid',
-        ]);
-
-        assert.equal(result.success, false);
-        assert.equal(
-          result.message,
-          "INSERT operation failed with message: 'column index out of range'"
-        );
+        assert.throws(() => {
+          const result = db.insert('INSERT INTO notes (content) VALUES (?)', [
+            1,
+            'should be invalid',
+          ]);
+        });
       });
     });
   });
