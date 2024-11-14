@@ -1,4 +1,4 @@
-export default function adjustDateISOString(previous?: Date): string {
+export default function setDateISO(previous?: Date): string {
   let date = previous;
   if (!date) {
     date = new Date();

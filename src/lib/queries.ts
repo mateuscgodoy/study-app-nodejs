@@ -8,7 +8,7 @@ id INTEGER PRIMARY KEY AUTOINCREMENT,
 text TEXT NOT NULL UNIQUE,
 question_type_id INTEGER NOT NULL,
 created_at TEXT,
-difficulty INTEGER CHECK(difficulty BETWEEN 0 AND 3),
+difficulty INTEGER CHECK(difficulty BETWEEN 0 AND 2),
 FOREIGN KEY (question_type_id) REFERENCES question_types(id)
 );
 CREATE TABLE IF NOT EXISTS alternatives (
@@ -34,20 +34,29 @@ UNIQUE(question_id, theme_id)
 );`;
 
 export const questionQueries: {
+  [key: string]: string;
   selectQuestionTypeId: string;
   selectQuestionById: string;
-
-  insertNewType: string;
   insertNewQuestion: string;
 } = {
   selectQuestionTypeId: 'SELECT id FROM question_types WHERE name = ?;',
-  selectQuestionById: `SELECT q.id, q.text, q.created_at, t.name as question_type 
+  selectQuestionById: `SELECT q.id, q.text, q.created_at, q.difficulty, t.name as question_type 
     FROM questions q 
     INNER JOIN question_types t ON q.question_type_id = t.id 
     WHERE q.id = ?;`,
-  insertNewType: 'INSERT INTO question_types (name) VALUES (?);',
   insertNewQuestion:
     'INSERT INTO questions (text, question_type_id, created_at, difficulty) VALUES (?, ?, ?, ?);',
+};
+
+export const typeQueries: {
+  [key: string]: string;
+  selectAllTypes: string;
+  selectTypeIDByName: string;
+  insertNewType: string;
+} = {
+  selectTypeIDByName: 'SELECT id FROM question_types WHERE name = ?;',
+  selectAllTypes: 'SELECT * FROM question_types;',
+  insertNewType: 'INSERT INTO question_types (name) VALUES (?);',
 };
 
 export const alternativeQueries: {
@@ -57,16 +66,25 @@ export const alternativeQueries: {
 } = {
   insertNewAlternative:
     'INSERT INTO alternatives (text, question_id, is_correct, explanation) VALUES (?,?,?,?);',
-  selectAlternatives: 'SELECT * FROM alternatives WHERE question_id = ?;',
+  selectAlternatives:
+    'SELECT a.text, a.is_correct, a.explanation FROM alternatives a WHERE question_id = ?;',
 };
 
 export const tagQueries: {
   [key: string]: string;
   insertTag: string;
-  insertTheme: string;
-  selectThemeId: string;
 } = {
   insertTag: 'INSERT INTO tags (question_id, theme_id) VALUES (?, ?);',
+};
+
+export const themeQueries: {
+  [key: string]: string;
+  selectThemeIDByName: string;
+  selectDisplayNameById: string;
+  insertTheme: string;
+} = {
+  selectThemeIDByName: 'SELECT id FROM themes WHERE name = ?;',
+  selectDisplayNameById:
+    'SELECT display_name FROM themes INNER JOIN tags ON themes.id = tags.theme_id WHERE question_id = ?;',
   insertTheme: 'INSERT INTO themes (name, display_name) VALUES (?, ?);',
-  selectThemeId: 'SELECT id FROM themes WHERE name = ?;',
 };

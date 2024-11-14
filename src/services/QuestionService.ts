@@ -1,107 +1,85 @@
-import DatabaseService from './DatabaseService';
-import { questionQueries as queries } from '../lib/util/questionQueries';
-import { ID, QuestionData, QuestionDisplay } from '../types/question.types';
-import OperationResult from '../lib/interfaces/OperationResult';
-import adjustDateISOString from '../lib/util/adjustDateISOString';
-import DIFFICULTY from '../lib/enums/difficulty';
+import { ID, InputQuestion, SerializedQuestion } from '../app.types';
+import { QuestionTypes } from '../lib/questionTypes';
+import Alternative from '../models/Alternative';
+import BaseQuestion from '../models/BaseQuestion';
+import InvalidArgument from '../models/InvalidArgument';
+import MultipleAnswersQuestion from '../models/MultipleAnswersQuestion';
+import SingleAnswerQuestion from '../models/SingleAnswerQuestion';
+import TrueOrFalseQuestion from '../models/TrueOrFalseQuestion';
+import AlternativeRepository from '../repos/AlternativeRepository';
+import QuestionRepository from '../repos/QuestionRepository';
+import TagRepository from '../repos/TagRepository';
+import ThemeRepository from '../repos/ThemeRepository';
+import TypeRepository from '../repos/TypeRepository';
 
 export default class QuestionService {
-  private db: DatabaseService;
+  constructor(
+    private questionRepo: QuestionRepository,
+    private alternativeRepo: AlternativeRepository,
+    private tagRepo: TagRepository,
+    private typeRepo: TypeRepository,
+    private themeRepo: ThemeRepository
+  ) {}
 
-  constructor(db: DatabaseService) {
-    this.db = db;
-  }
-
-  createQuestion(data: QuestionData): OperationResult<ID> {
-    try {
-      const typeId = this.getQuestionTypeId(data.questionType);
-      const insertResult = this.db.insert(queries.insertNewQuestion, [
-        data.text,
-        typeId,
-        adjustDateISOString(new Date()),
-        data.difficulty ?? DIFFICULTY.NONE,
-      ]);
-      const questionId = insertResult.data?.newId!;
-
-      return {
-        success: true,
-        message: 'Create Question completed successfully.',
-        data: questionId,
-      };
-    } catch (error) {
-      throw error;
+  save(data: SerializedQuestion): ID {
+    const { question, alternatives, tags } = data;
+    let questionTypeID = this.typeRepo.getID(question.questionType);
+    if (questionTypeID === -1) {
+      questionTypeID = this.typeRepo.create(question.questionType);
     }
-  }
-
-  readQuestion(id: number): OperationResult<Required<QuestionDisplay>> {
-    // TODO Read Question
-    throw new Error('Not Implemented');
-    // try {
-    //   const getQuestion = this.db.get<QuestionData>(
-    //     queries.selectQuestionById,
-    //     [id]
-    //   );
-    //   if (!getQuestion.success || !getQuestion.data?.id) {
-    //     throw new InvalidQuery(getQuestion.message, queries.selectQuestionById);
-    //   }
-    //   const questionData: QuestionData = getQuestion.data!;
-    //   const getAlternatives = this.db.getAll<AlternativeDBM[]>(
-    //     queries.selectAlternatives,
-    //     [questionData.id!]
-    //   );
-    //   if (!getAlternatives.success) {
-    //     throw new InvalidQuery(
-    //       getAlternatives.message,
-    //       queries.selectAlternatives
-    //     );
-    //   }
-    //   const alternatives: AlternativeDBM[] = getAlternatives.data!;
-    //   const question = QuestionFactory.build(questionData, alternatives);
-
-    //   return {
-    //     success: true,
-    //     message: `Read Question operation completed successfully.`,
-    //     data: question,
-    //   };
-    // } catch (error) {
-    //   return {
-    //     success: false,
-    //     message: `Read Operation failed with message:' ${
-    //       (error as Error).message
-    //     }'`,
-    //     error: error as Error,
-    //   };
-    // }
-  }
-
-  // Make it public when implemented
-  private updateQuestion() {
-    // TODO Question Controller UPDATE method
-    throw new Error('NOT IMPLEMENTED');
-  }
-
-  // Make it public when implemented
-  private deleteQuestion() {
-    // TODO Question Controller DELETE method
-    throw new Error('NOT IMPLEMENTED');
-  }
-
-  private getQuestionTypeId(questionType: string): ID {
-    try {
-      const result = this.db.get<{ id: ID | null }>(
-        queries.selectQuestionTypeId,
-        [questionType]
-      );
-
-      let id = result.data?.id;
-      if (!id) {
-        const result = this.db.insert(queries.insertNewType, [questionType]);
-        id = result.data?.newId;
+    const questionID = this.questionRepo.create(question, questionTypeID);
+    for (const alt of alternatives) {
+      this.alternativeRepo.create(alt, questionID);
+    }
+    for (const theme of tags) {
+      let themeID = this.themeRepo.getID(theme.name);
+      if (themeID === -1) {
+        themeID = this.themeRepo.create(theme);
       }
+      this.tagRepo.create(themeID, questionID);
+    }
+    return questionID;
+  }
 
-      return id!;
-    } catch (error) {
-      throw error;
+  load(questionID: ID): BaseQuestion {
+    const questionData = this.questionRepo.read(questionID);
+    const alternativesData = this.alternativeRepo.read(questionID);
+    const tagsData = this.themeRepo.read(questionID);
+
+    const question = this.createInstance(
+      questionData.question_type,
+      questionData as InputQuestion
+    );
+    for (const data of alternativesData) {
+      const { text, explanation } = data;
+      const isCorrect = data.is_correct === 1 ? true : false;
+      const alternative = new Alternative(text, isCorrect, explanation ?? '');
+      question.addAlternative(alternative);
+    }
+    for (const tag of tagsData) {
+      question.addTag(tag.display_name);
+    }
+    return question;
+  }
+
+  private createInstance(
+    questionType: string,
+    data: InputQuestion
+  ): BaseQuestion {
+    switch (questionType) {
+      case QuestionTypes.TRUE_OR_FALSE:
+        return new TrueOrFalseQuestion(data);
+
+      case QuestionTypes.SINGLE_ANSWER:
+        return new SingleAnswerQuestion(data);
+
+      case QuestionTypes.MULTIPLE_ANSWERS:
+        return new MultipleAnswersQuestion(data);
+
+      default:
+        throw new InvalidArgument(
+          `Invalid Question Type encountered: ${questionType}`
+        );
     }
   }
 }

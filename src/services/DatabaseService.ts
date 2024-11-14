@@ -1,46 +1,37 @@
 import { DatabaseSync, SupportedValueType } from 'node:sqlite';
 
-import InvalidQuery from '../models/errors/InvalidQuery';
-import OperationResult from '../lib/interfaces/OperationResult';
-import { initQuestionDatabase } from '../lib/util/questionQueries';
-import { ID } from '../types/question.types';
+import InvalidArgument from '../models/InvalidArgument';
+import { ID } from '../app.types';
 
 export default class DatabaseService {
   private instance: DatabaseSync;
 
-  constructor(dbPath: string = ':memory:') {
+  constructor(dbPath: string = ':memory:', initQuery: string) {
     this.instance = new DatabaseSync(dbPath);
-    this.instance.exec(initQuestionDatabase);
+    this.instance.exec(initQuery);
   }
 
-  get<T>(query: string, params: SupportedValueType[] = []): OperationResult<T> {
+  get<T>(query: string, params: SupportedValueType[] = []): T {
     try {
-      const result = this.instance.prepare(query).get(...params);
+      const result = this.instance.prepare(query).get(...params) as T;
 
       if (!result) {
-        throw new InvalidQuery('Invalid GET query provided', query);
+        throw new InvalidArgument('Invalid GET query provided');
       }
-      return {
-        success: true,
-        message: 'GET query completed',
-        data: result as T,
-      };
+
+      return result;
     } catch (error) {
       throw error;
     }
   }
 
-  getAll<T>(
-    query: string,
-    params: SupportedValueType[] = []
-  ): OperationResult<T> {
+  getAll<T>(query: string, params: SupportedValueType[] = []): T[] {
     try {
-      const result = this.instance.prepare(query).all(...params);
-      return {
-        success: true,
-        message: 'GET ALL query completed',
-        data: result as T,
-      };
+      const result = this.instance.prepare(query).all(...params) as T[];
+      if (!result) {
+        throw new InvalidArgument('Invalid GET ALL query provided');
+      }
+      return result;
     } catch (error) {
       throw error;
     }
@@ -49,15 +40,14 @@ export default class DatabaseService {
   insert(
     query: string,
     params: SupportedValueType[] = []
-  ): OperationResult<{ newId: ID; changes: ID }> {
+  ): { newId: ID; changes: ID } {
     try {
       const statement = this.instance.prepare(query);
       const { changes, lastInsertRowid } = statement.run(...params);
-      return {
-        success: true,
-        message: 'INSERT query completed',
-        data: { newId: lastInsertRowid, changes: changes },
-      };
+      if (!changes) {
+        throw new InvalidArgument('Invalid INSERT query provided', query);
+      }
+      return { newId: lastInsertRowid, changes: changes };
     } catch (error) {
       throw error;
     }

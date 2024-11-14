@@ -1,6 +1,6 @@
 import assert from 'assert';
 import { beforeEach, describe, it } from 'node:test';
-import DatabaseService from '../services/DatabaseService';
+import DatabaseService from '../../services/DatabaseService';
 
 const createTestTable = `CREATE TABLE IF NOT EXISTS notes(
 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -29,8 +29,7 @@ describe('DatabaseService', () => {
 
     describe('GET method', () => {
       it('correctly GET a single Note from testing table', () => {
-        const result = db.get<Note>('SELECT * FROM notes WHERE id = ?', [1]);
-        const note = result.data;
+        const note = db.get<Note>('SELECT * FROM notes WHERE id = ?', [1]);
 
         assert.ok(result.success);
         assert.ok(note);
