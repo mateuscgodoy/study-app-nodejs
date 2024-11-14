@@ -51,7 +51,13 @@ export default class QuestionManager {
     };
     try {
       // Future data validation
-      const id = this.questionService.save(data);
+      let id = data.question.id;
+      if (id) {
+        output.message = 'Updating the question records on Database';
+        // Future call to UPDATE
+        return output;
+      }
+      id = this.questionService.save(data);
       output.data = id;
     } catch (error) {
       if (this.debug) {

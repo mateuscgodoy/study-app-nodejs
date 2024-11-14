@@ -21,6 +21,7 @@ export type QuestionDisplay = Omit<
 };
 
 export type QuestionDB = {
+  id?: ID;
   text: string;
   createdAt: string;
   questionType: string;

@@ -7,6 +7,7 @@ import {
 import convertDifficulty from '../lib/convertDifficulty';
 import setDateISO from '../lib/setDateISO';
 import Alternative from './Alternative';
+import InvalidArgument from './InvalidArgument';
 import Theme from './Theme';
 
 export default abstract class BaseQuestion {
@@ -30,6 +31,7 @@ export default abstract class BaseQuestion {
 
   display(): QuestionDisplay {
     return {
+      id: this.id,
       text: this.text,
       instruction: this.getInstruction(),
       alternatives: this.alternatives.map((alt) => alt.text),
@@ -42,6 +44,7 @@ export default abstract class BaseQuestion {
   serialize(): SerializedQuestion {
     return {
       question: {
+        id: this.id,
         text: this.text,
         questionType: this.getType(),
         createdAt: setDateISO(this.createdAt),
@@ -54,7 +57,10 @@ export default abstract class BaseQuestion {
 
   addTag(displayName: string) {
     const theme = new Theme(displayName);
-    if (this.tags.some((tag) => Theme.isEqual(theme, tag))) return;
+    if (this.tags.some((tag) => Theme.isEqual(theme, tag))) {
+      const message = 'This question already contains this tag';
+      throw new InvalidArgument(message, message);
+    }
     this.tags.push(theme);
   }
 }
