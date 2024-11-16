@@ -31,9 +31,7 @@ export default class Theme {
   }
 
   static isEqual(themeA: Theme, themeB: Theme): boolean {
-    return (
-      themeA.name === themeB.name && themeA.displayName === themeB.displayName
-    );
+    return themeA.name === themeB.name;
   }
 
   static compareTo(themeA: Theme, themeB: Theme): number {
